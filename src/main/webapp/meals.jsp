@@ -6,16 +6,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h3>Meals list</h3>
+<h3>Список еды</h3>
+<a href="meals?action=create">Создать</a>
 <table cellpadding="15">
-    <tr>
-        <b>
-            <td>Date & time</td>
-            <td>Description</td>
-            <td>Calories</td>
+    <tr style="font-style: italic">
+            <td>Дата и время</td>
+            <td>Описание</td>
+            <td>Калории</td>
             <td></td>
             <td></td>
-        </b>
     </tr>
     <c:forEach items="${meals}" var="meal">
         <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.MealTo"/>
@@ -23,8 +22,8 @@
             <td>${meal.dateTime.toString().replace("T", " ")}</td>
             <td>${meal.description}</td>
             <td>${meal.calories}</td>
-            <td><a href="/meals?action=delete&id=${meal.id}">Удалить</a></td>
-            <td><a href="/meals?action=edit&id=${meal.id}">Редактировать</a></td>
+            <td><a href="meals?action=delete&id=${meal.id}">Удалить</a></td>
+            <td><a href="meals?action=edit&id=${meal.id}">Редактировать</a></td>
         </tr>
     </c:forEach>
 </table>
