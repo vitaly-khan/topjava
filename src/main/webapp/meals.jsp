@@ -1,3 +1,5 @@
+<%@ page import="java.time.LocalDate" %>
+<%@ page import="java.time.LocalTime" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -21,6 +23,44 @@
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
+    <table>
+        <tr>
+            <td>From date</td>
+            <td>To date</td>
+            <td></td>
+            <td>From time</td>
+            <td>To time</td>
+        </tr>
+        <form method="get" action="meals">
+<%--            <input type="hidden" value="filter" name="action">--%>
+            <tr>
+                <td>
+                    <input type="date" value="${param.fromdate}" name="fromdate">
+                </td>
+                <td>
+                    <input type="date" value="${param.todate}" name="todate">
+                </td>
+                <td></td>
+                <td>
+                    <input type="time" value="${param.fromtime}" name="fromtime">
+                </td>
+                <td>
+                    <input type="time" value="${param.totime}" name="totime">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button type="submit">Применить</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button type="reset" onclick="location.href='meals'">Сбросить</button>
+                </td>
+            </tr>
+        </form>
+    </table>
+    <br>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
     <table border="1" cellpadding="8" cellspacing="0">
