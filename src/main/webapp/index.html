@@ -10,5 +10,21 @@
     <li><a href="users">Users</a></li>
     <li><a href="meals">Meals</a></li>
 </ul>
+
+<hr/>
+<form method="post" action="users">
+    <p>
+        <select name="authuser">
+            <option selected disabled>Выберите пользователя</option>
+            <option value="0">
+                Admin
+            </option>
+            <option value="1">
+                User
+            </option>
+        </select>
+        <button type="submit">Подтвердить</button>
+    </p>
+</form>
 </body>
 </html>
