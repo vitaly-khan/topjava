@@ -32,7 +32,7 @@
             <td>To time</td>
         </tr>
         <form method="get" action="meals">
-<%--            <input type="hidden" value="filter" name="action">--%>
+            <input type="hidden" value="filter" name="action">
             <tr>
                 <td>
                     <input type="date" value="${param.fromdate}" name="fromdate">

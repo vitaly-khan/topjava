@@ -61,6 +61,20 @@ public class MealRestController {
         int userId = authUserId();
         log.info("GetFiltered: startdate='{}', enddate='{}', starttime='{}', endtime='{}'",
                 startDate, endDate, startTime, endTime);
+
+        if (startDate == null) {
+            startDate = LocalDate.MIN;
+        }
+        if (endDate == null) {
+            endDate = LocalDate.MAX;
+        }
+        if (startTime == null) {
+            startTime = LocalTime.MIN;
+        }
+        if (endTime == null) {
+            endTime = LocalTime.MAX;
+        }
+
         return MealsUtil.getFilteredTos(service.getFiltered(userId, startDate, endDate), authUserCaloriesPerDay(),
                 startTime, endTime);
     }

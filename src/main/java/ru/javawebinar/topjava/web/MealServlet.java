@@ -7,6 +7,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.repository.inmemory.InMemoryMealRepository;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
@@ -51,7 +52,6 @@ public class MealServlet extends HttpServlet {
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
 
-        log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
         if (meal.isNew()) {
             mealController.create(meal);
         } else {
@@ -67,10 +67,9 @@ public class MealServlet extends HttpServlet {
         switch (action == null ? "all" : action) {
             case "delete":
                 int id = getId(request);
-                log.info("Delete {}", id);
                 mealController.delete(id);
                 response.sendRedirect("meals");
-                break;
+                return;
             case "create":
             case "update":
                 final Meal meal = "create".equals(action) ?
@@ -78,24 +77,20 @@ public class MealServlet extends HttpServlet {
                         mealController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
+                return;
+            case "filter":
+                request.setAttribute("meals", mealController.getFiltered(
+                        DateTimeUtil.parseLocalDate(request.getParameter("fromdate")),
+                        DateTimeUtil.parseLocalDate(request.getParameter("todate")),
+                        DateTimeUtil.parseLocalTime(request.getParameter("fromtime")),
+                        DateTimeUtil.parseLocalTime(request.getParameter("totime"))));
                 break;
             case "all":
             default:
-                String fromdate = request.getParameter("fromdate");
-                String todate = request.getParameter("todate");
-                String fromtime = request.getParameter("fromtime");
-                String totime = request.getParameter("totime");
-
-                log.info("getFiltered: fromdate='{}', todate='{}', fromtime='{}', totime='{}'",
-                        fromdate, todate, fromtime, totime);
-                LocalDate startDate = fromdate == null || fromdate.isEmpty() ? LocalDate.MIN : LocalDate.parse(fromdate);
-                LocalDate endDate = todate == null || todate.isEmpty() ? LocalDate.MAX : LocalDate.parse(todate);
-                LocalTime startTime = fromtime == null || fromtime.isEmpty() ? LocalTime.MIN : LocalTime.parse(fromtime);
-                LocalTime endTime = totime == null || totime.isEmpty() ? LocalTime.MAX : LocalTime.parse(totime);
-                request.setAttribute("meals", mealController.getFiltered(startDate, endDate, startTime, endTime));
-                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                request.setAttribute("meals", mealController.getAll());
                 break;
         }
+        request.getRequestDispatcher("/meals.jsp").forward(request, response);
     }
 
     private int getId(HttpServletRequest request) {
