@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
@@ -110,6 +111,14 @@ public class MealServiceTest {
         expected.setId(newId);
         assertThat(actual).isEqualTo(expected);
         assertThat(service.get(newId, ADMIN_ID)).isEqualTo(expected);
+    }
+
+    @Test(expected = DataAccessException.class)
+    public void duplicateDatetimeCreate() {
+        Meal duplicate = new Meal(MEAL2);
+        duplicate.setId(null);
+        duplicate.setDescription("Тест на дублирование даты");
+        service.create(duplicate, USER_ID);
     }
 }
 

@@ -47,7 +47,6 @@ public class JdbcMealRepository implements MealRepository {
             Number id = sjInsert.executeAndReturnKey(sqlSource);
             meal.setId(id.intValue());
         } else if (npjTemplate.update("UPDATE meals SET " +
-                "user_id=:user_id, " +
                 "datetime=:datetime, " +
                 "description=:description, " +
                 "calories=:calories " +
