@@ -1,19 +1,34 @@
 package ru.javawebinar.topjava.model;
 
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@Entity
+@Table(name="Meals", uniqueConstraints = {
+        @UniqueConstraint(name = "meals_unique_user_datetime_idx", columnNames = {
+                "user_id", "date_time"})})
 public class Meal extends AbstractBaseEntity {
+
+    @Column(name = "date_time", nullable = false)
+    @NotNull
     private LocalDateTime dateTime;
 
+    @Column(nullable = false)
+    @NotBlank
+    @Size(min = 2)
     private String description;
 
+    @Column(nullable = false)
+    @NotNull
+    @Positive
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    //Join column 'user_id' is gonna be created (or mapped) automatically by ORMF
     private User user;
 
     public Meal() {
