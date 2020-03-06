@@ -1,8 +1,14 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Stopwatch;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -14,6 +20,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.concurrent.TimeUnit;
 
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
@@ -32,20 +39,45 @@ public class MealServiceTest {
     @Autowired
     private MealRepository repository;
 
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
+    private static StringBuilder sb = new StringBuilder("All tests duration:\n");
+
+    private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
+    @Rule
+    public Stopwatch stopwatch = new Stopwatch() {
+        @Override
+        protected void finished(long nanos, Description description) {
+            String str = String.format(ANSI_YELLOW + "%-25s %d мс" + ANSI_RESET + "%n",
+                    description.getMethodName() + ",", TimeUnit.NANOSECONDS.toMillis(nanos));
+            log.info(str);
+            sb.append(str);
+        }
+    };
+
+
+    @AfterClass
+    public static void result() {
+        System.out.println(sb);
+    }
+
+
     @Test
     public void delete() throws Exception {
         service.delete(MEAL1_ID, USER_ID);
         Assert.assertNull(repository.get(MEAL1_ID, USER_ID));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteNotFound() throws Exception {
-        service.delete(1, USER_ID);
+        Assert.assertThrows(NotFoundException.class, () -> service.delete(1, USER_ID));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteNotOwn() throws Exception {
-        service.delete(MEAL1_ID, ADMIN_ID);
+        Assert.assertThrows(NotFoundException.class, () -> service.delete(MEAL1_ID, ADMIN_ID));
+
     }
 
     @Test
@@ -64,14 +96,14 @@ public class MealServiceTest {
         MEAL_MATCHER.assertMatch(actual, ADMIN_MEAL1);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void getNotFound() throws Exception {
-        service.get(1, USER_ID);
+        Assert.assertThrows(NotFoundException.class, () -> service.get(1, USER_ID));
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void getNotOwn() throws Exception {
-        service.get(MEAL1_ID, ADMIN_ID);
+        Assert.assertThrows(NotFoundException.class, () -> service.get(MEAL1_ID, ADMIN_ID));
     }
 
     @Test
@@ -81,9 +113,9 @@ public class MealServiceTest {
         MEAL_MATCHER.assertMatch(service.get(MEAL1_ID, USER_ID), updated);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void updateNotFound() throws Exception {
-        service.update(MEAL1, ADMIN_ID);
+        Assert.assertThrows(NotFoundException.class, () -> service.update(MEAL1, ADMIN_ID));
     }
 
     @Test
