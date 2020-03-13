@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.service;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
@@ -17,8 +18,12 @@ public class UserService {
 
     private final UserRepository repository;
 
-    public UserService(UserRepository repository) {
+    private final MealService mealService;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    public UserService(UserRepository repository, MealService mealService) {
         this.repository = repository;
+        this.mealService = mealService;
     }
 
     @CacheEvict(value = "users", allEntries = true)
@@ -34,6 +39,13 @@ public class UserService {
 
     public User get(int id) {
         return checkNotFoundWithId(repository.get(id), id);
+    }
+
+    @Transactional
+    public User getWithMeal(int id) {
+        User result = get(id);
+        result.setMeals(mealService.getAll(id));
+        return result;
     }
 
     public User getByEmail(String email) {
