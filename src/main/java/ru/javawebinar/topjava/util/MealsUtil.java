@@ -17,6 +17,10 @@ public class MealsUtil {
     private MealsUtil() {
     }
 
+    public static MealTo createTo(Meal meal, boolean excess) {
+        return new MealTo(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
+    }
+
     public static List<MealTo> getTos(Collection<Meal> meals, int caloriesPerDay) {
         return filteredByStreams(meals, caloriesPerDay, meal -> true);
     }
@@ -36,9 +40,5 @@ public class MealsUtil {
                 .filter(filter)
                 .map(meal -> createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
-    }
-
-    private static MealTo createTo(Meal meal, boolean excess) {
-        return new MealTo(meal.getId(), meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
     }
 }
