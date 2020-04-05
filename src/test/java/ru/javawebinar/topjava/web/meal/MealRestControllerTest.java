@@ -8,27 +8,22 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.TestMatcher;
 import ru.javawebinar.topjava.TestUtil;
-import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
-import ru.javawebinar.topjava.web.SecurityUtil;
 import ru.javawebinar.topjava.web.json.JsonUtil;
-
-import java.time.LocalDate;
-import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.javawebinar.topjava.MealTestData.*;
-import static ru.javawebinar.topjava.TestUtil.readFromJson;
-import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.UserTestData.USER;
+import static ru.javawebinar.topjava.UserTestData.USER_ID;
+import static ru.javawebinar.topjava.util.MealsUtil.createTo;
 
 class MealRestControllerTest extends AbstractControllerTest {
 
@@ -80,7 +75,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void update() throws Exception {
-        Meal updated = MealTestData.getUpdated();
+        Meal updated = getUpdated();
         perform(MockMvcRequestBuilders.put(REST_MEALS_URL_WITH_SLASH + MEAL1_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
@@ -91,13 +86,36 @@ class MealRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void getBetweenOld() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_MEALS_URL_WITH_SLASH +
+                "betweenOld?start=2020-01-31T00:00&end=2020-01-31T13:00"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(TestMatcher.usingFieldsComparator(MealTo.class)
+                        .contentJson(
+                                createTo(MEAL5, true),
+                                createTo(MEAL4, true)));
+    }
+
+    @Test
     void getBetween() throws Exception {
         perform(MockMvcRequestBuilders.get(REST_MEALS_URL_WITH_SLASH +
-                "between?start=2020-01-31T00:00&end=2020-01-31T13:00:00"))
-                .andExpect(status().isOk())
+                "between?startDate=2020-01-31&startTime=00-00&endDate=2020-01-31&endTime=13-00"))
                 .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(TestMatcher.usingFieldsComparator(MealTo.class)
+                        .contentJson(
+                                createTo(MEAL5, true),
+                                createTo(MEAL4, true)));
+    }
+
+    @Test
+    void getBetweenWithNullParameters() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_MEALS_URL_WITH_SLASH +
+                "between?startDate=&startTime=&endDate=&endTime="))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(TestMatcher.usingFieldsComparator(MealTo.class).contentJson(
-                        MealsUtil.createTo(MEAL5, true),
-                        MealsUtil.createTo(MEAL4, true)));
+                        MealsUtil.getTos(MEALS, USER.getCaloriesPerDay())));
     }
 }
