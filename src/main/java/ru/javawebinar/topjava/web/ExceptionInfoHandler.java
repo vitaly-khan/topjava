@@ -40,9 +40,13 @@ public class ExceptionInfoHandler {
     }
 
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)  // 422
-    @ExceptionHandler(BindException.class)
-    public ErrorInfo handleBindingError(HttpServletRequest req, BindException e) {
-        String detail = e.getBindingResult().getFieldErrors().stream()
+    @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
+    public ErrorInfo handleBindingError(HttpServletRequest req, Exception e) {
+        BindingResult bindingResult = e instanceof BindException ?
+                ((BindException) e).getBindingResult() :
+                ((MethodArgumentNotValidException) e).getBindingResult();
+
+        String detail = bindingResult.getFieldErrors().stream()
                 .map(fe -> String.format("[%s] %s", fe.getField(), fe.getDefaultMessage()))
                 .collect(Collectors.joining("<br>"));
         return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, detail);
