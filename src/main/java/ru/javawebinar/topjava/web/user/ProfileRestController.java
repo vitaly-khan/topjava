@@ -1,12 +1,15 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.to.UserTo;
+import ru.javawebinar.topjava.web.json.JsonUtil;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -32,10 +35,14 @@ public class ProfileRestController extends AbstractUserController {
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<User> register(@Valid @RequestBody UserTo userTo) {
-        User created = super.create(userTo);
-        URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(REST_URL).build().toUri();
-        return ResponseEntity.created(uriOfNewResource).body(created);
+        try {
+            User created = super.create(userTo);
+            URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path(REST_URL).build().toUri();
+            return ResponseEntity.created(uriOfNewResource).body(created);
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.unprocessableEntity().body(new User()); //TODO: complete body arguments
+        }
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
